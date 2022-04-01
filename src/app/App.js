@@ -11,21 +11,19 @@ const App = () => {
     };
 
     const handleToggleBookMark = (id) => {
-        console.log(id);
+        const userIndex = users.findIndex(user => user._id === id);
+        const newUsers = [...users];
+        newUsers[userIndex].bookmark = newUsers[userIndex].bookmark === false ? true : false;
+        setUsers(newUsers);
     }
 
     return (
         <>
-            <SearchStatus
-                length={users.length}
-            />
-            {users.length > 0 && (
+            <SearchStatus length={users.length}/>
                 <Users 
                     users={users}
                     onDelete={handleDelete}
-                    onToggleBookMark={handleToggleBookMark}
-                />
-            )}
+                    onToggleBookMark={handleToggleBookMark}/>
         </>
     )
 };
