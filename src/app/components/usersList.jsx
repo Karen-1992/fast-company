@@ -6,9 +6,10 @@ import PropTypes from "prop-types";
 import GroupList from "./groupList";
 import SearchStatus from "./searchStatus";
 import UserTable from "./usersTable";
+import Loader from "./loader";
 import _ from "lodash";
 
-const Users = () => {
+const UsersList = () => {
     const pageSize = 4;
     const [currentPage, setCurrentPage] = useState(1);
     const [professions, setProfession] = useState();
@@ -75,8 +76,6 @@ const Users = () => {
                                 selectedItem={selectedProf}
                                 items={professions}
                                 onItemSelect={handleProfessionSelect}
-                                valueProperty="_id"
-                                contentProperty="name"
                             />
                             <button
                                 className="btn btn-secondary mt-2"
@@ -110,15 +109,12 @@ const Users = () => {
             </div>
         );
     }
-    return "loading";
+    return <Loader/>;
 };
 
-GroupList.defaultProps = {
-    valueProperty: "_id",
-    contentProperty: "name"
-};
-Users.propTypes = {
-    users: PropTypes.arrayOf(PropTypes.object.isRequired)
+UsersList.propTypes = {
+    users: PropTypes.arrayOf(PropTypes.object.isRequired),
+    appi: PropTypes.arrayOf(PropTypes.object.isRequired)
 };
 
-export default Users;
+export default UsersList;
