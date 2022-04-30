@@ -19,15 +19,15 @@ const TableBody = ({ data, columns }) => {
             {data.map((item) => (
                 <tr key={item._id}>
                     {Object.keys(columns).map((column) => (
-                        columns[column].name === "Имя"
-                            ? (
-                                <td key={column}>
+                        <td key={column}>
+                            {columns[column].name === "Имя"
+                                ? (
                                     <Link to={`users/${item._id}`}>
                                         {renderContent(item, column)}
                                     </Link>
-                                </td>
-                            )
-                            : <td key={column}>{renderContent(item, column)}</td>
+                                )
+                                : renderContent(item, column)}
+                        </td>
                     ))}
                 </tr>
             ))}
