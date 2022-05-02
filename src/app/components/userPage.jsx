@@ -1,32 +1,30 @@
 import { React, useEffect, useState } from "react";
-import { useParams, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
+import PropTypes from "prop-types";
 import Loader from "./loader";
 import api from "../api";
+import QualitiesList from "./qualitiesList";
 
-const UserPage = () => {
-    const [selectedUser, setSelectedUser] = useState();
+const UserPage = ({ userId }) => {
+    const [user, setUser] = useState();
     const history = useHistory();
-    const { userId } = useParams();
+    // const { userId } = useParams();
     useEffect(() => {
-        api.users.getById(userId).then(data => setSelectedUser(data));
+        api.users.getById(userId).then(data => setUser(data));
     }, []);
     const handleShowAllUsers = () => {
         history.push("/users");
     };
     return (
         <>
-            { selectedUser
+            { user
                 ? (
-                    <div key={selectedUser._id} className="m-3">
-                        <h1>{selectedUser.name}</h1>
-                        <h3>Профессия: {selectedUser.profession.name}</h3>
-                        {selectedUser.qualities.map(quality => (
-                            <p key={quality._id} className={"m-2 badge bg-" + quality.color}>
-                                {quality.name}
-                            </p>)
-                        )}
-                        <p>completedMeetings: {selectedUser.completedMeetings}</p>
-                        <h3>Rate: {selectedUser.rate}</h3>
+                    <div key={user._id} className="m-3">
+                        <h1>{user.name}</h1>
+                        <h2>Профессия: {user.profession.name}</h2>
+                        <QualitiesList qualities={user.qualities}/>
+                        <p>completedMeetings: {user.completedMeetings}</p>
+                        <h2>Rate: {user.rate}</h2>
                         <button
                             className='btn btn-secondary'
                             onClick={handleShowAllUsers}
@@ -40,4 +38,7 @@ const UserPage = () => {
     );
 };
 
+UserPage.propTypes = {
+    userId: PropTypes.string.isRequired
+};
 export default UserPage;

@@ -9,7 +9,7 @@ const Users = () => {
     return (
         <>
             {userId
-                ? <UserPage />
+                ? <UserPage userId={userId} />
                 : <UsersList />
             }
         </>
