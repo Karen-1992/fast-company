@@ -11,6 +11,7 @@ import _ from "lodash";
 
 const UsersList = () => {
     const pageSize = 4;
+    const [searchUsers, setSearchUsers] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [professions, setProfession] = useState();
     const [selectedProf, setSelectedProf] = useState();
@@ -19,7 +20,11 @@ const UsersList = () => {
     useEffect(() => {
         api.users.fetchAll().then((data) => setUsers(data));
     }, []);
-
+    const clearFilter = () => setSelectedProf();
+    const handleSearchedUsersChange = ({ target }) => {
+        clearFilter();
+        setSearchUsers(target.value);
+    };
     const handleDelete = (userId) => {
         setUsers(users.filter((user) => user._id !== userId));
     };
@@ -36,6 +41,7 @@ const UsersList = () => {
     }, []);
     useEffect(() => {
         setCurrentPage(1);
+        setSearchUsers("");
     }, [selectedProf]);
 
     const handleProfessionSelect = (item) => {
@@ -45,27 +51,27 @@ const UsersList = () => {
     const handlePageChange = (pageIndex) => {
         setCurrentPage(pageIndex);
     };
-
     const handleSort = (item) => {
+        setSearchUsers("");
         setSortBy(item);
     };
-
     if (users) {
         const filteredUsers = selectedProf
             ? users.filter((user) => user.profession._id === selectedProf._id)
-            : users;
+            : searchUsers
+                ? users.filter(user => user.name.toLowerCase().includes(searchUsers.trim().toLowerCase()))
+                : users;
+
         const count = filteredUsers.length;
         const sortedUsers = _.orderBy(
             filteredUsers,
             [sortBy.path],
             [sortBy.order]
         );
-
         const userCrop = paginate(sortedUsers, currentPage, pageSize);
         if (userCrop.length === 0 && currentPage !== 1) {
             setCurrentPage(currentPage - 1);
         }
-        const clearFilter = () => setSelectedProf();
 
         return (
             <div className="d-flex">
@@ -88,6 +94,14 @@ const UsersList = () => {
                 </div>
                 <div className="d-flex flex-column">
                     <SearchStatus length={count} />
+                    <input
+                        type="text"
+                        id="text"
+                        name="text"
+                        placeholder="Search..."
+                        value={searchUsers}
+                        onChange={handleSearchedUsersChange}
+                    />
                     {count > 0 && (
                         <UserTable
                             users={userCrop}
