@@ -7,8 +7,7 @@ const Loader = () => {
                 className="spinner-border spinner-border-sm"
                 role="status"
                 aria-hidden="true"
-            >
-            </span>
+            ></span>
             <span className="m-2">Loading...</span>
         </button>
     );

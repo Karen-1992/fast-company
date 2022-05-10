@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { paginate } from "../utils/paginate";
-import Pagination from "./pagination";
-import api from "../api";
+import { paginate } from "../../../utils/paginate";
+import Pagination from "../../common/pagination";
+import api from "../../../api";
 import PropTypes from "prop-types";
-import GroupList from "./groupList";
-import SearchStatus from "./searchStatus";
-import UserTable from "./usersTable";
-import Loader from "./loader";
+import GroupList from "../../common/groupList";
+import SearchStatus from "../../ui/searchStatus";
+import UserTable from "../../ui/usersTable";
+import Loader from "../../common/loader";
 import _ from "lodash";
 
-const UsersList = () => {
+const UsersListPage = () => {
     const pageSize = 4;
-    const [searchUsers, setSearchUsers] = useState("");
+    const [searchQuerry, setSearchQuerry] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [professions, setProfession] = useState();
     const [selectedProf, setSelectedProf] = useState();
@@ -20,46 +20,47 @@ const UsersList = () => {
     useEffect(() => {
         api.users.fetchAll().then((data) => setUsers(data));
     }, []);
-    const clearFilter = () => setSelectedProf();
-    const handleSearchedUsersChange = ({ target }) => {
-        clearFilter();
-        setSearchUsers(target.value);
-    };
-    const handleDelete = (userId) => {
-        setUsers(users.filter((user) => user._id !== userId));
-    };
-
+    useEffect(() => {
+        api.professions.fetchAll().then((data) => setProfession(data));
+    }, []);
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [selectedProf, searchQuerry]);
     const handleToggleBookMark = (id) => {
         const userIndex = users.findIndex((user) => user._id === id);
         const newUsers = [...users];
         newUsers[userIndex].bookmark = !newUsers[userIndex].bookmark;
         setUsers(newUsers);
     };
-
-    useEffect(() => {
-        api.professions.fetchAll().then((data) => setProfession(data));
-    }, []);
-    useEffect(() => {
-        setCurrentPage(1);
-        setSearchUsers("");
-    }, [selectedProf]);
-
+    const clearFilter = () => setSelectedProf();
+    const handleSearchQuerry = ({ target }) => {
+        clearFilter();
+        setSearchQuerry(target.value);
+    };
+    const handleDelete = (userId) => {
+        setUsers(users.filter((user) => user._id !== userId));
+    };
     const handleProfessionSelect = (item) => {
         setSelectedProf(item);
+        if (searchQuerry !== "") setSearchQuerry("");
     };
 
     const handlePageChange = (pageIndex) => {
         setCurrentPage(pageIndex);
     };
     const handleSort = (item) => {
-        setSearchUsers("");
+        setSearchQuerry("");
         setSortBy(item);
     };
     if (users) {
         const filteredUsers = selectedProf
-            ? users.filter((user) => user.profession._id === selectedProf._id)
-            : searchUsers
-                ? users.filter(user => user.name.toLowerCase().includes(searchUsers.trim().toLowerCase()))
+            ? users.filter((user) => JSON.stringify(user.profession) === JSON.stringify(selectedProf))
+            : searchQuerry
+                ? users.filter((user) =>
+                    user.name
+                        .toLowerCase()
+                        .includes(searchQuerry.trim().toLowerCase())
+                )
                 : users;
 
         const count = filteredUsers.length;
@@ -97,10 +98,10 @@ const UsersList = () => {
                     <input
                         type="text"
                         id="text"
-                        name="text"
+                        name="searchQuerry"
                         placeholder="Search..."
-                        value={searchUsers}
-                        onChange={handleSearchedUsersChange}
+                        value={searchQuerry}
+                        onChange={handleSearchQuerry}
                     />
                     {count > 0 && (
                         <UserTable
@@ -123,12 +124,12 @@ const UsersList = () => {
             </div>
         );
     }
-    return <Loader/>;
+    return <Loader />;
 };
 
-UsersList.propTypes = {
+UsersListPage.propTypes = {
     users: PropTypes.arrayOf(PropTypes.object.isRequired),
     appi: PropTypes.arrayOf(PropTypes.object.isRequired)
 };
 
-export default UsersList;
+export default UsersListPage;
