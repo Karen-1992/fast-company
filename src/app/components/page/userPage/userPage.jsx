@@ -6,13 +6,13 @@ import api from "../../../api";
 import Qualities from "../../ui/qualities";
 
 const UserPage = ({ userId }) => {
-    const [user, setUser] = useState();
     const history = useHistory();
+    const [user, setUser] = useState();
     useEffect(() => {
         api.users.getById(userId).then((data) => setUser(data));
     }, []);
     const handleEditUserInfo = () => {
-        history.push(`/users/${userId}/edit`);
+        history.push(history.location.pathname + "/edit");
     };
     return (
         <>
