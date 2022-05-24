@@ -4,6 +4,7 @@ import TextField from "../../common/form/textField";
 import SelectField from "../../common/form/selectField";
 import RadioField from "../../common/form/radioField";
 import MultiSelectField from "../../common/form/multiSelectField";
+import BackHistoryButton from "../../common/backButton";
 import api from "../../../api";
 import { validator } from "../../../utils/validator";
 import Loader from "../../common/loader";
@@ -130,6 +131,7 @@ const EditUserPage = () => {
     };
     return (
         <div className="container mt-5">
+            <BackHistoryButton />
             <div className="row">
                 <div className="col-md-6 offset-md-3 shadow p-4">
                     <form onSubmit={handleSubmit}>

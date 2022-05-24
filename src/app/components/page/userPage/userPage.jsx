@@ -1,41 +1,42 @@
 import { React, useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
 import PropTypes from "prop-types";
-import Loader from "../../common/loader";
 import api from "../../../api";
-import Qualities from "../../ui/qualities";
+import Loader from "../../common/loader";
+import UserCard from "../../ui/userCard";
+import QualitiesCard from "../../ui/qualitiesCard";
+import MeetingsCard from "../../ui/meetingsCard";
+import Comments from "../../ui/comments";
 
 const UserPage = ({ userId }) => {
-    const history = useHistory();
     const [user, setUser] = useState();
     useEffect(() => {
         api.users.getById(userId).then((data) => setUser(data));
     }, []);
-    const handleEditUserInfo = () => {
-        history.push(history.location.pathname + "/edit");
-    };
     return (
-        <>
+        <div className="container">
             { user
                 ? (
-                    <div key={user._id} className="m-3">
-                        <h1>{user.name}</h1>
-                        <h2>Профессия: {user.profession.name}</h2>
-                        <Qualities qualities={user.qualities} />
-                        <p>completedMeetings: {user.completedMeetings}</p>
-                        <h2>Rate: {user.rate}</h2>
-                        <button
-                            className="btn btn-secondary"
-                            onClick={handleEditUserInfo}
-                        >
-                            Изменить
-                        </button>
+                    <div key={user._id} className="row gutters-sm">
+                        <div className="col-md-4 mb-3">
+                            <UserCard
+                                user={user}
+                            />
+                            <QualitiesCard
+                                data={user.qualities}
+                            />
+                            <MeetingsCard
+                                value={user.completedMeetings}
+                            />
+                        </div>
+                        <div className="col-md-8">
+                            <Comments />
+                        </div>
                     </div>
                 )
                 : (
                     <Loader />
                 )}
-        </>
+        </div>
     );
 };
 
