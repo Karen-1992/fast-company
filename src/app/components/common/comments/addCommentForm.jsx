@@ -36,6 +36,9 @@ const AddCommentForm = ({ onSubmit }) => {
     useEffect(() => {
         api.users.fetchAll().then(setUsers);
     }, []);
+    useEffect(() => {
+        validate();
+    }, [data]);
     const clearForm = () => {
         setData(initialData);
         setErrors({});

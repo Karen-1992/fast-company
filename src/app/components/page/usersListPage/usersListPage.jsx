@@ -8,6 +8,7 @@ import SearchStatus from "../../ui/searchStatus";
 import UserTable from "../../ui/usersTable";
 import Loader from "../../common/loader";
 import _ from "lodash";
+import { useUser } from "../../../hooks/useUsers";
 
 const UsersListPage = () => {
     const pageSize = 4;
@@ -16,10 +17,7 @@ const UsersListPage = () => {
     const [professions, setProfession] = useState();
     const [selectedProf, setSelectedProf] = useState();
     const [sortBy, setSortBy] = useState({ path: "name", order: "asc" });
-    const [users, setUsers] = useState();
-    useEffect(() => {
-        api.users.fetchAll().then((data) => setUsers(data));
-    }, []);
+    const { users } = useUser();
     useEffect(() => {
         api.professions.fetchAll().then((data) => setProfession(data));
     }, []);
@@ -30,7 +28,8 @@ const UsersListPage = () => {
         const userIndex = users.findIndex((user) => user._id === id);
         const newUsers = [...users];
         newUsers[userIndex].bookmark = !newUsers[userIndex].bookmark;
-        setUsers(newUsers);
+        console.log(newUsers);
+        // setUsers(newUsers);
     };
     const clearFilter = () => setSelectedProf();
     const handleSearchQuerry = ({ target }) => {
@@ -38,7 +37,8 @@ const UsersListPage = () => {
         setSearchQuerry(target.value);
     };
     const handleDelete = (userId) => {
-        setUsers(users.filter((user) => user._id !== userId));
+        console.log(userId);
+        // setUsers(users.filter((user) => user._id !== userId));
     };
     const handleProfessionSelect = (item) => {
         setSelectedProf(item);
