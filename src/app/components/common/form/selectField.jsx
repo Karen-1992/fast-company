@@ -16,7 +16,13 @@ const SelectField = ({
     const getInputClasses = () => {
         return "form-select" + (error ? " is-invalid" : "");
     };
-
+    const optionsArray =
+        !Array.isArray(options) && typeof options === "object"
+            ? Object.keys(options).map((optionName) => ({
+                name: options[optionName].name,
+                value: options[optionName]._id
+            }))
+            : options;
     return (
         <div className="mb-4">
             <label htmlFor={name} className="form-label">
@@ -32,9 +38,12 @@ const SelectField = ({
                 <option disabled value="">
                     {defaultOption}
                 </option>
-                {Array.isArray(options) &&
-                    options.map((option) => (
-                        <option value={option.value} key={option.value}>
+                {optionsArray.length &&
+                    optionsArray.map((option) => (
+                        <option
+                            value={option.value}
+                            key={option.value}
+                        >
                             {option.label}
                         </option>
                     ))}

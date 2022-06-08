@@ -22,16 +22,8 @@ export const QualitiesProvider = ({ children }) => {
             setError(null);
         }
     }, [error]);
-    const getQualities = (idArray) => {
-        const userQualities = [];
-        for (const id of idArray) {
-            for (const qual of qualities) {
-                if (id === qual._id) {
-                    userQualities.push(qual);
-                }
-            }
-        }
-        return userQualities;
+    const getQuality = (id) => {
+        return qualities.find(q => q._id === id);
     };
     async function getQualitiesList() {
         try {
@@ -51,7 +43,7 @@ export const QualitiesProvider = ({ children }) => {
             value={{
                 isLoading,
                 qualities,
-                getQualities
+                getQuality
             }}
         >
             {children}
