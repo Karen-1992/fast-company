@@ -1,86 +1,64 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useHistory } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import TextField from "../../common/form/textField";
 import SelectField from "../../common/form/selectField";
 import RadioField from "../../common/form/radioField";
 import MultiSelectField from "../../common/form/multiSelectField";
 import BackHistoryButton from "../../common/backButton";
-import api from "../../../api";
 import { validator } from "../../../utils/validator";
-import Loader from "../../common/loader";
+import { useQualities } from "../../../hooks/useQuality";
+import { useAuth } from "../../../hooks/useAuth";
+import { useProfessions } from "../../../hooks/useProfession";
+import { useUser } from "../../../hooks/useUser";
 
 const EditUserPage = () => {
     const { userId } = useParams();
+    const { getUserById } = useUser();
+    const user = getUserById(userId);
+    const { updateUser } = useAuth();
     const history = useHistory();
-    const [isLoading, setIsLoading] = useState(false);
+    const { qualities, isLoading: isQualitiesLoading } = useQualities();
+    const { professions, isLoading: isProfessionLoading } = useProfessions();
     const [data, setData] = useState({
-        name: "",
-        email: "",
-        profession: "",
-        sex: "male",
-        qualities: []
+        name: user.name,
+        // email: user.email,
+        profession: user.profession,
+        sex: user.sex,
+        qualities: getQualities(user.qualities)
     });
-    const [professions, setProfession] = useState([]);
-    const [qualities, setQualities] = useState([]);
     const [errors, setErrors] = useState({});
-    const getProfessionById = (id) => {
-        for (const prof of professions) {
-            if (prof.value === id) {
-                return { _id: prof.value, name: prof.label };
-            }
-        }
-    };
-    const getQualities = (elements) => {
-        const qualitiesArray = [];
-        for (const elem of elements) {
-            for (const quality in qualities) {
-                if (elem.value === qualities[quality].value) {
-                    qualitiesArray.push({
-                        _id: qualities[quality].value,
-                        name: qualities[quality].label,
-                        color: qualities[quality].color
+    function getQualities(idArray) {
+        const userQualities = [];
+        for (const id of idArray) {
+            for (const qual of qualities) {
+                if (id === qual._id) {
+                    userQualities.push({
+                        value: qual._id,
+                        label: qual.name,
+                        color: qual.color
                     });
                 }
             }
         }
-        return qualitiesArray;
-    };
-    const transformData = (data) => {
+        return userQualities;
+    }
+    function transformQualitiesList(data) {
         return data.map((qual) => ({
             value: qual._id,
             label: qual.name,
             color: qual.color
         }));
-    };
-    useEffect(() => {
-        setIsLoading(true);
-        api.users.getById(userId).then(({ profession, qualities, ...data }) => setData(prevState => ({
-            ...prevState,
-            ...data,
-            qualities: transformData(qualities),
-            profession: profession._id
-        })));
-    }, []);
-    useEffect(() => {
-        api.professions.fetchAll().then((data) => {
-            const professionsList = Object.keys(data).map((professionName) => ({
-                label: data[professionName].name,
-                value: data[professionName]._id
-            }));
-            setProfession(professionsList);
-        });
-        api.qualities.fetchAll().then((data) => {
-            const qualitiesList = Object.keys(data).map((optionName) => ({
-                value: data[optionName]._id,
-                label: data[optionName].name,
-                color: data[optionName].color
-            }));
-            setQualities(qualitiesList);
-        });
-    }, []);
-    useEffect(() => {
-        if (data._id) setIsLoading(false);
-    }, [data]);
+    }
+    const qualitiesList = transformQualitiesList(qualities);
+    function transformProfessionsList(data) {
+        const result = [];
+        data.map(p => result.push({
+            label: p.name,
+            value: p._id
+        }));
+        return result;
+    }
+    const professionsList = transformProfessionsList(professions);
     const validatorConfig = {
         name: {
             isRequired: {
@@ -111,23 +89,23 @@ const EditUserPage = () => {
             [target.name]: target.value
         }));
     };
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const isValid = validate();
         if (!isValid) return;
-        const { profession, qualities } = data;
-        api.users
-            .update(userId, {
-                ...data,
-                profession: getProfessionById(profession),
-                qualities: getQualities(qualities)
-            })
-            .then((data) => history.push(`/users/${data._id}`));
-        // console.log({
-        //     ...data,
-        //     profession: getProfessionById(profession),
-        //     qualities: getQualities(qualities)
-        // });
+        const newData = {
+            ...user,
+            ...data,
+            profession: data.profession,
+            qualities: data.qualities.map((q) => q.value)
+        };
+        try {
+            await updateUser(newData);
+            history.push(`/users/${userId}`);
+        } catch (error) {
+            console.log(error);
+            // setErrors(error);
+        }
     };
     return (
         <div className="container mt-5">
@@ -135,7 +113,7 @@ const EditUserPage = () => {
             <div className="row">
                 <div className="col-md-6 offset-md-3 shadow p-4">
                     <form onSubmit={handleSubmit}>
-                        {!isLoading && Object.keys(professions).length > 0 ? (
+                        {!isProfessionLoading && !isQualitiesLoading && user ? (
                             <>
                                 <TextField
                                     label="Имя"
@@ -144,17 +122,17 @@ const EditUserPage = () => {
                                     onChange={handleChange}
                                     error={errors.name}
                                 />
-                                <TextField
+                                {/* <TextField
                                     label="Электронная почта"
                                     name="email"
                                     value={data.email}
                                     onChange={handleChange}
                                     error={errors.email}
-                                />
+                                /> */}
                                 <SelectField
                                     label="Выбери свою профессию"
                                     defaultOption="Choose..."
-                                    options={professions}
+                                    options={professionsList}
                                     name="profession"
                                     onChange={handleChange}
                                     value={data.profession}
@@ -173,7 +151,7 @@ const EditUserPage = () => {
                                 />
                                 <MultiSelectField
                                     defaultValue={data.qualities}
-                                    options={qualities}
+                                    options={qualitiesList}
                                     onChange={handleChange}
                                     name="qualities"
                                     label="Выберите ваши качества"
@@ -186,7 +164,7 @@ const EditUserPage = () => {
                                     Обновить
                                 </button>
                             </>
-                        ) : <Loader/>
+                        ) : <p>Loading...</p>
                         }
                     </form>
                 </div>

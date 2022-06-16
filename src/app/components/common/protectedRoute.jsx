@@ -3,8 +3,14 @@ import { Redirect, Route } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import PropTypes from "prop-types";
 
-function ProtectedRoute({ component: Component, children, ...rest }) {
+function ProtectedRoute({
+    component: Component,
+    children,
+    computedMatch,
+    ...rest
+}) {
     const { currentUser } = useAuth();
+    const { userId, edit } = computedMatch.params;
     return (
         <Route
             {...rest}
@@ -21,6 +27,11 @@ function ProtectedRoute({ component: Component, children, ...rest }) {
                         />
                     );
                 }
+                if (edit && userId !== currentUser._id) {
+                    return (
+                        <Redirect to={`/users/${currentUser._id}/edit`} />
+                    );
+                }
                 return Component ? <Component {...props} /> : children;
             }}
         />
@@ -29,6 +40,7 @@ function ProtectedRoute({ component: Component, children, ...rest }) {
 
 ProtectedRoute.propTypes = {
     component: PropTypes.func,
+    computedMatch: PropTypes.object,
     location: PropTypes.object,
     children: PropTypes.oneOfType([
         PropTypes.arrayOf(PropTypes.node),
