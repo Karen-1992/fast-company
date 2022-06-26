@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useHistory, useParams } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import TextField from "../../common/form/textField";
 import SelectField from "../../common/form/selectField";
 import RadioField from "../../common/form/radioField";
@@ -9,56 +9,42 @@ import { validator } from "../../../utils/validator";
 import { useQualities } from "../../../hooks/useQuality";
 import { useAuth } from "../../../hooks/useAuth";
 import { useProfessions } from "../../../hooks/useProfession";
-import { useUser } from "../../../hooks/useUser";
 
 const EditUserPage = () => {
-    const { userId } = useParams();
-    const { getUserById } = useUser();
-    const user = getUserById(userId);
-    const { updateUser } = useAuth();
+    const { updateUser, currentUser } = useAuth();
     const history = useHistory();
-    const { qualities, isLoading: isQualitiesLoading } = useQualities();
-    const { professions, isLoading: isProfessionLoading } = useProfessions();
-    const [data, setData] = useState({
-        name: user.name,
-        // email: user.email,
-        profession: user.profession,
-        sex: user.sex,
-        qualities: getQualities(user.qualities)
-    });
+    const [isLoading, setIsLoading] = useState(true);
+    const { qualities, isLoading: qualitiesLoading } = useQualities();
+    const { professions, isLoading: professionLoading } = useProfessions();
+    const [data, setData] = useState();
     const [errors, setErrors] = useState({});
-    function getQualities(idArray) {
-        const userQualities = [];
-        for (const id of idArray) {
-            for (const qual of qualities) {
-                if (id === qual._id) {
-                    userQualities.push({
-                        value: qual._id,
-                        label: qual.name,
-                        color: qual.color
-                    });
-                }
-            }
-        }
-        return userQualities;
-    }
-    function transformQualitiesList(data) {
-        return data.map((qual) => ({
+    function transformData(data) {
+        return getQualitiesListByIds(data).map((qual) => ({
             value: qual._id,
             label: qual.name,
             color: qual.color
         }));
     }
-    const qualitiesList = transformQualitiesList(qualities);
-    function transformProfessionsList(data) {
-        const result = [];
-        data.map(p => result.push({
-            label: p.name,
-            value: p._id
-        }));
-        return result;
+    function getQualitiesListByIds(qualitiesIds) {
+        const qualitiesArray = [];
+        for (const qualId of qualitiesIds) {
+            for (const quality of qualities) {
+                if (qualId === quality._id) {
+                    qualitiesArray.push(quality);
+                    break;
+                }
+            }
+        }
+        return qualitiesArray;
     }
-    const professionsList = transformProfessionsList(professions);
+    const qualitiesList = qualities.map((q) => ({
+        label: q.name,
+        value: q._id
+    }));
+    const professionsList = professions.map((p) => ({
+        label: p.name,
+        value: p._id
+    }));
     const validatorConfig = {
         name: {
             isRequired: {
@@ -77,6 +63,19 @@ const EditUserPage = () => {
     useEffect(() => {
         validate();
     }, [data]);
+    useEffect(() => {
+        if (!professionLoading && !qualitiesLoading && currentUser && !data) {
+            setData({
+                ...currentUser,
+                qualities: transformData(currentUser.qualities)
+            });
+        }
+    }, [professionLoading, qualitiesLoading, currentUser, data]);
+    useEffect(() => {
+        if (data && isLoading) {
+            setIsLoading(false);
+        }
+    }, [data]);
     const validate = () => {
         const errors = validator(data, validatorConfig);
         setErrors(errors);
@@ -93,19 +92,11 @@ const EditUserPage = () => {
         e.preventDefault();
         const isValid = validate();
         if (!isValid) return;
-        const newData = {
-            ...user,
+        await updateUser({
             ...data,
-            profession: data.profession,
             qualities: data.qualities.map((q) => q.value)
-        };
-        try {
-            await updateUser(newData);
-            history.push(`/users/${userId}`);
-        } catch (error) {
-            console.log(error);
-            // setErrors(error);
-        }
+        });
+        history.push(`/users/${currentUser._id}`);
     };
     return (
         <div className="container mt-5">
@@ -113,7 +104,7 @@ const EditUserPage = () => {
             <div className="row">
                 <div className="col-md-6 offset-md-3 shadow p-4">
                     <form onSubmit={handleSubmit}>
-                        {!isProfessionLoading && !isQualitiesLoading && user ? (
+                        {!isLoading && Object.keys(professions).length > 0 ? (
                             <>
                                 <TextField
                                     label="Имя"
