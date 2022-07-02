@@ -1,4 +1,4 @@
 {
-    "apiEndPoint": "https://fast-company-firebase-da2e4-default-rtdb.europe-west1.firebasedatabase.app/",
+    "apiEndpoint": "https://fast-company-firebase-da2e4-default-rtdb.europe-west1.firebasedatabase.app/",
     "isFireBase": true
 }

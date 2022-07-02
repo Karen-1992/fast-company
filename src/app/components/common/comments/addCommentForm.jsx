@@ -1,9 +1,14 @@
 import React, { useState } from "react";
 import TextAreaField from "../form/textAreaField";
 import { validator } from "../../../utils/validator";
+import { useSelector } from "react-redux";
+import { getCurrentUserId } from "../../../store/users";
+import { useParams } from "react-router-dom";
 import PropTypes from "prop-types";
 
 const AddCommentForm = ({ onSubmit }) => {
+    const currentUserId = useSelector(getCurrentUserId());
+    const { userId } = useParams();
     const [data, setData] = useState({});
     const [errors, setErrors] = useState({});
     const handleChange = (target) => {
@@ -19,6 +24,7 @@ const AddCommentForm = ({ onSubmit }) => {
             }
         }
     };
+
     const validate = () => {
         const errors = validator(data, validatorConfig);
         setErrors(errors);
@@ -32,7 +38,7 @@ const AddCommentForm = ({ onSubmit }) => {
         e.preventDefault();
         const isValid = validate();
         if (!isValid) return;
-        onSubmit(data);
+        onSubmit({ data, userId, currentUserId });
         clearForm();
     };
     return (
@@ -47,15 +53,12 @@ const AddCommentForm = ({ onSubmit }) => {
                     error={errors.content}
                 />
                 <div className="d-flex justify-content-end">
-                    <button className="btn btn-primary">
-                        Опубликовать
-                    </button>
+                    <button className="btn btn-primary">Опубликовать</button>
                 </div>
             </form>
         </div>
     );
 };
-
 AddCommentForm.propTypes = {
     onSubmit: PropTypes.func
 };

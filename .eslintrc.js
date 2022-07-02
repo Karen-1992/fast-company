@@ -21,7 +21,8 @@ module.exports = {
         ],
         "multiline-ternary": ["off"],
         quotes: [
-            "error", "double",
+            "error",
+            "double",
             {
                 allowTemplateLiterals: true,
                 avoidEscape: true

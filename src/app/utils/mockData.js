@@ -1,16 +1,15 @@
-import professions from "../mockData/professions.json";
-import users from "../mockData/users.json";
-import qualities from "../mockData/qualities.json";
 import { useEffect, useState } from "react";
+import professions from "../mockData/professions.json";
+import qualities from "../mockData/qualities.json";
+import users from "../mockData/users.json";
 import httpService from "../services/http.service";
 
-const useMocData = () => {
+const useMockData = () => {
     const statusConsts = {
         idle: "Not Started",
-        pending: "In process",
+        pending: "In Process",
         successed: "Ready",
-        error: "Error occured"
-
+        error: "Error occurred"
     };
     const [error, setError] = useState(null);
     const [status, setStatus] = useState(statusConsts.idle);
@@ -18,9 +17,8 @@ const useMocData = () => {
     const [count, setCount] = useState(0);
     const summaryCount = professions.length + qualities.length + users.length;
     const incrementCount = () => {
-        setCount(prevState => prevState + 1);
+        setCount((prevState) => prevState + 1);
     };
-
     const updateProgress = () => {
         if (count !== 0 && status === statusConsts.idle) {
             setStatus(statusConsts.pending);
@@ -33,6 +31,7 @@ const useMocData = () => {
             setStatus(statusConsts.successed);
         }
     };
+
     useEffect(() => {
         updateProgress();
     }, [count]);
@@ -46,8 +45,8 @@ const useMocData = () => {
                 await httpService.put("user/" + user._id, user);
                 incrementCount();
             }
-            for (const quality of qualities) {
-                await httpService.put("quality/" + quality._id, quality);
+            for (const qual of qualities) {
+                await httpService.put("quality/" + qual._id, qual);
                 incrementCount();
             }
         } catch (error) {
@@ -55,9 +54,8 @@ const useMocData = () => {
             setStatus(statusConsts.error);
         }
     }
-    return (
-        { error, initialize, progress, status }
-    );
+
+    return { error, initialize, progress, status };
 };
 
-export default useMocData;
+export default useMockData;
