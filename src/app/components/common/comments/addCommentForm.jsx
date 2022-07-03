@@ -1,14 +1,9 @@
 import React, { useState } from "react";
 import TextAreaField from "../form/textAreaField";
 import { validator } from "../../../utils/validator";
-import { useSelector } from "react-redux";
-import { getCurrentUserId } from "../../../store/users";
-import { useParams } from "react-router-dom";
 import PropTypes from "prop-types";
 
 const AddCommentForm = ({ onSubmit }) => {
-    const currentUserId = useSelector(getCurrentUserId());
-    const { userId } = useParams();
     const [data, setData] = useState({});
     const [errors, setErrors] = useState({});
     const handleChange = (target) => {
@@ -38,7 +33,7 @@ const AddCommentForm = ({ onSubmit }) => {
         e.preventDefault();
         const isValid = validate();
         if (!isValid) return;
-        onSubmit({ data, userId, currentUserId });
+        onSubmit(data);
         clearForm();
     };
     return (
